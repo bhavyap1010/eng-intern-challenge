@@ -1,4 +1,4 @@
-const table = {
+var table = {
     'a': 'O.....',
     'b': 'O.O...',
     'c': 'OO....',
@@ -39,8 +39,7 @@ const table = {
     '(': 'O.O..O',
     ')': '.O.OO.'
 };
-
-const num = {
+var num = {
     '.': '.O...O',
     '1': 'O.....',
     '2': 'O.O...',
@@ -55,79 +54,85 @@ const num = {
     '<': '.OO..O',
     '>': 'O..OO.'
 };
-
-const reversed = Object.fromEntries(Object.entries(table).map(([k, v]) => [v, k]));
-const reversed_num = Object.fromEntries(Object.entries(num).map(([k, v]) => [v, k]));
-
+var reversed = Object.fromEntries(Object.entries(table).map(function (_a) {
+    var k = _a[0], v = _a[1];
+    return [v, k];
+}));
+var reversed_num = Object.fromEntries(Object.entries(num).map(function (_a) {
+    var k = _a[0], v = _a[1];
+    return [v, k];
+}));
 function isBraille(txt) {
-    return [...txt].every(c => c === 'O' || c === '.');
+    return txt.split('').every(function (c) { return c === 'O' || c === '.'; });
 }
-
 function toEnglish(txt) {
-    const brailles = txt.match(/.{1,6}/g) || [];
-    let out = '';
-    let isCap = false;
-    let isNum = false;
-
-    for (let b of brailles) {
+    var brailles = txt.match(/.{1,6}/g) || [];
+    var out = '';
+    var isCap = false;
+    var isNum = false;
+    for (var _i = 0, brailles_1 = brailles; _i < brailles_1.length; _i++) {
+        var b = brailles_1[_i];
         if (b === table['cap']) {
             isCap = true;
-        } else if (b === table['num']) {
+        }
+        else if (b === table['num']) {
             isNum = !isNum;
-        } else if (b === table[' ']) {
+        }
+        else if (b === table[' ']) {
             out += ' ';
-        } else if (isCap && reversed[b]) {
+        }
+        else if (isCap && reversed[b]) {
             out += reversed[b].toUpperCase();
             isCap = false;
-        } else if (isNum && reversed_num[b]) {
-            out += reversed_num[b] || '';
-        } else if (reversed[b]) {
+        }
+        else if (isNum && reversed_num[b]) {
+            out += reversed_num[b];
+        }
+        else if (reversed[b]) {
             out += reversed[b];
-        } else {
+        }
+        else {
             out += '?';
         }
     }
     return out;
 }
-
 function toBraille(txt) {
-    let out = '';
-    let isNum = false;
-
-    for (let c of txt) {
+    var out = '';
+    var isNum = false;
+    for (var _i = 0, txt_1 = txt; _i < txt_1.length; _i++) {
+        var c = txt_1[_i];
         if (/\d/.test(c)) {
             if (!isNum) {
                 out += table['num'];
                 isNum = true;
             }
             out += num[c];
-        } else {
+        }
+        else {
             isNum = false;
             if (/[A-Z]/.test(c)) {
                 out += table['cap'] + table[c.toLowerCase()];
-            } else if (table[c]) {
+            }
+            else if (table[c]) {
                 out += table[c];
             }
         }
     }
     return out;
 }
-
 function main() {
-    const args = process.argv.slice(2);
-
+    var args = process.argv.slice(2);
     if (args.length === 0) {
         console.log("Please provide input text or braille.");
         return;
     }
-
-    const txt = args.join(' ');
-
+    var txt = args.join(' ');
     if (isBraille(txt)) {
         console.log(toEnglish(txt));
-    } else {
+    }
+    else {
         console.log(toBraille(txt));
     }
 }
-
 main();

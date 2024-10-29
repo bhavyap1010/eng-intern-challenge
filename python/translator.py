@@ -28,7 +28,6 @@ table = {
     'y': 'OO.OOO',
     'z': 'O..OOO',
     'cap': '.....O',
-    '.': '.O...O',
     'num': '.O.OOO',
     '.': '..OO.O',
     ',': '..O....',
@@ -44,6 +43,7 @@ table = {
 }
 
 num = {
+    '.': '.O...O',
     '1': 'O.....',
     '2': 'O.O...',
     '3': 'OO....',
@@ -57,12 +57,14 @@ num = {
     '<': '.OO..O',
     '>': 'O..OO.',
 }
-
 reversed = {v: k for k, v in table.items()}
 reversed_num = {v: k for k, v in num.items()}
 
-
 def main():
+    if len(sys.argv) <= 1:
+        print("Please provide input text or braille.")
+        return
+
     txt = sys.argv[1]
 
     if is_braille(txt):
@@ -78,41 +80,48 @@ def is_braille(txt):
     return True
 
 def to_english(txt):
-
     brailles = [txt[i:i+6] for i in range(0, len(txt), 6)]
-
     out = ""
-
     is_cap = False
     is_num = False
     for b in brailles:
-        if b in reversed:
-            if b == table['cap']:
-                is_cap = True
-            elif b == table['num']:
-                is_num = not is_num
-            elif is_cap:
-                out += reversed[b].upper()
-                is_cap = False
-            elif is_num:
-                out += reversed_num[b]
-            else:
-                out += reversed[b]
-
+        if b == table['cap']:
+            is_cap = True
+        elif b == table['num']:
+            is_num = not is_num
+        elif b == table[' ']:
+            out += ' '
+        elif is_cap and b in reversed:
+            out += reversed[b].upper()
+            is_cap = False
+        elif is_num and b in reversed_num:
+            out += reversed_num.get(b, '') 
+        elif b in reversed:
+            out += reversed[b]
+        else:
+            out += '?'
     return out
 
 def to_braille(txt):
     out = ''
+    is_num = False
     for c in txt:
-        if c in table:
-            out += table[c]
-        elif c.lower() in table and c.isalpha() and c.isupper():
-            out += table['cap'] + table[c.lower()]
-        elif c in num:
-            out += table['num'] + num[c]
-                
+        if c.isdigit():
+            if not is_num:
+                out += table['num']
+                is_num = True
+            out += num[c]
+        else:
+            if is_num:
+                is_num = False
+            if c.isalpha():
+                if c.isupper():
+                    out += table['cap'] + table[c.lower()]
+                else:
+                    out += table[c]
+            elif c in table:
+                out += table[c]
     return out
-        
 
 if __name__ == '__main__':
     main()
